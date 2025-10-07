@@ -1,34 +1,41 @@
 # RÉSUMÉ DE LA CORRECTION / FIX SUMMARY
 
 ## 🎯 Problème / Problem
-Le bouton "Parcourir..." fonctionne avec le clavier (Tab + Espace) mais pas avec la souris.
-The "Parcourir..." button works with keyboard (Tab + Space) but not with mouse clicks.
+Le bouton "Parcourir..." fonctionne avec le clavier (Tab + Espace) mais pas avec la souris. Toute la section "ENREGISTREMENT PHOTOS/VIDÉOS" ne répond pas aux clics souris.
+The "Parcourir..." button works with keyboard (Tab + Space) but not with mouse clicks. The entire "ENREGISTREMENT PHOTOS/VIDÉOS" section doesn't respond to mouse clicks.
 
 ## ✅ Solution
-3 modifications minimales dans `Sources/StatusWindowController.swift`:
+4 modifications dans `Sources/StatusWindowController.swift`:
 
-### 1. Fenêtre - Événements Souris (Ligne 116)
+### 1. **CORRECTION PRINCIPALE** - Contrainte d'Ancrage du Conteneur (Ligne 375)
+```swift
+saveLocationBox.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+```
+**Pourquoi:** Sans cette contrainte, le conteneur n'avait pas de hauteur bien définie, ce qui empêchait toute la section de recevoir les événements souris. C'était le vrai problème !
+
+### 2. Fenêtre - Événements Souris (Ligne 116)
 ```swift
 window.ignoresMouseEvents = false  // Autoriser explicitement les événements souris
 ```
 **Pourquoi:** En mode plein écran, s'assurer que les clics souris sont traités.
 
-### 2. Champ de Texte - Sélection (Ligne 919)
+### 3. Champ de Texte - Sélection (Ligne 919)
 ```swift
 pathField.isSelectable = false  // Empêcher la sélection de texte de consommer les clics
 ```
-**Pourquoi:** Un champ texte non-éditable peut quand même capturer les clics pour sélectionner du texte, ce qui peut interférer avec les contrôles à proximité.
+**Pourquoi:** Un champ texte non-éditable peut quand même capturer les clics pour sélectionner du texte.
 
-### 3. Bouton - État Activé (Ligne 934)
+### 4. Bouton - État Activé (Ligne 934)
 ```swift
 selectButton.isEnabled = true  // Activer explicitement le bouton
 ```
 **Pourquoi:** S'assurer que le bouton est prêt à recevoir les clics souris.
 
 ## 📝 Fichiers Modifiés / Modified Files
-- ✅ `Sources/StatusWindowController.swift` - 3 lignes ajoutées / 3 lines added
+- ✅ `Sources/StatusWindowController.swift` - 4 lignes ajoutées / 4 lines added
 - ✅ `.gitignore` - Créé pour exclure les artefacts de build
 - ✅ `FIX_EXPLANATION.md` - Documentation technique complète
+- ✅ `RÉSUMÉ.md` - Ce fichier
 
 ## 🧪 Tests à Effectuer / Testing Required
 1. ✅ Compiler l'application / Build the application
@@ -38,16 +45,13 @@ selectButton.isEnabled = true  // Activer explicitement le bouton
 5. ✅ **Tester le clavier**: Tab jusqu'au bouton, puis Espace - Devrait toujours fonctionner
 
 ## 📊 Impact
-- ✅ Correction chirurgicale - seulement 3 lignes modifiées
+- ✅ Correction du problème de disposition (layout) - la vraie cause !
 - ✅ Navigation au clavier préservée
 - ✅ Compatibilité manette préservée
 - ✅ Aucun changement de fonctionnalité existante
 - ✅ Aucune modification d'Info.plist nécessaire
 
 ## 🔍 Détails Techniques
-Les modifications assurent que:
-1. La fenêtre traite les événements souris même en mode plein écran
-2. Le champ de texte ne capture pas les clics destinés aux contrôles voisins
-3. Le bouton est explicitement activé pour l'interaction souris
+Le problème principal était une contrainte manquante dans le système de layout Auto Layout. Sans la contrainte `bottomAnchor`, le conteneur de la section "ENREGISTREMENT PHOTOS/VIDÉOS" n'était pas correctement positionné dans la hiérarchie des vues, ce qui empêchait tous les événements souris d'atteindre cette section.
 
-Ces changements corrigent l'interaction entre le mode plein écran, la gestion complexe du focus (pour manette et clavier), et les contrôles AppKit standard.
+Les autres modifications aident à garantir une gestion robuste des événements souris dans différents scénarios (mode plein écran, gestion du focus complexe pour manette et clavier).

@@ -5,38 +5,46 @@
 The "Parcourir" (Browse) button in the save location section was:
 - ✅ Accessible via keyboard navigation (Tab + Space)
 - ❌ Not clickable with mouse
+- ❌ The entire "ENREGISTREMENT PHOTOS/VIDÉOS" section was not responding to mouse clicks
 
 ## Root Cause
 
-The issue was caused by a combination of factors related to mouse event handling in macOS:
+The issue was caused by a **layout constraint problem**, not just event handling:
 
-1. **Text Field Selection**: The `pathField` text field, even though marked as not editable, was still selectable by default. This meant it could intercept mouse clicks in its vicinity for text selection operations.
+**Critical Issue:** The container for the save location section (`createMappingAndSaveSection`) was missing a bottom anchor constraint. Without this constraint connecting the `saveLocationBox.bottomAnchor` to the `container.bottomAnchor`, the container's intrinsic height was ambiguous. This caused the save location section to be positioned outside the properly laid out view hierarchy, making it unable to receive mouse events.
 
-2. **Button State**: The button's enabled state was not explicitly set, which in some edge cases with complex window configurations (like fullscreen mode) could lead to ambiguous behavior.
-
-3. **Window Mouse Event Handling**: With the complex focus management required for gamepad and keyboard control, the window's mouse event handling needed to be explicitly confirmed.
+**Contributing Factors:**
+1. The text field was selectable by default, which could intercept clicks
+2. The button's enabled state was not explicitly set
+3. Window mouse event handling needed explicit configuration
 
 ## Solution
 
-Three targeted changes were made to ensure mouse events reach the button:
+Four targeted changes were made:
 
-### 1. Window Mouse Events (Line 116)
+### 1. Container Bottom Anchor Constraint (Line 375) - **PRIMARY FIX**
+```swift
+saveLocationBox.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+```
+**Why**: This constraint ensures the container properly encompasses the save location box, positioning it within the view hierarchy where it can receive mouse events.
+
+### 2. Window Mouse Events (Line 116)
 ```swift
 window.ignoresMouseEvents = false  // Explicitly allow mouse events
 ```
-**Why**: When a window enters fullscreen mode or has complex focus management (as required for gamepad support), explicitly ensuring mouse events are not ignored helps prevent edge cases where clicks might be blocked.
+**Why**: Ensures the window processes mouse events properly in fullscreen mode.
 
-### 2. Text Field Selection (Line 919)
+### 3. Text Field Selection (Line 919)
 ```swift
 pathField.isSelectable = false  // Prevent text selection to avoid consuming clicks
 ```
-**Why**: By default, NSTextField can be selectable even when not editable, which means it can capture mouse clicks for text selection. This can interfere with clicking nearby UI elements. Setting `isSelectable = false` ensures the text field doesn't intercept clicks.
+**Why**: Prevents the text field from intercepting mouse clicks meant for nearby controls.
 
-### 3. Button Enabled State (Line 934)
+### 4. Button Enabled State (Line 934)
 ```swift
 selectButton.isEnabled = true  // Explicitly enable the button
 ```
-**Why**: Explicitly setting the enabled state ensures the button is ready to receive mouse clicks, especially important in complex view hierarchies and focus management scenarios.
+**Why**: Ensures the button is ready to receive mouse clicks.
 
 ## Testing
 
@@ -49,9 +57,9 @@ To test the fix:
 
 ## Technical Notes
 
-- The changes are minimal and surgical - only affecting the specific components involved
+- The primary fix was the layout constraint - without it, the entire section was not properly positioned in the view hierarchy
+- The additional changes help ensure robust mouse event handling across different scenarios
 - Keyboard navigation is preserved and unaffected
-- The fix addresses the interaction between fullscreen mode, complex focus management, and standard AppKit controls
 - No changes to Info.plist were needed - mouse/pointer permissions are not required for standard UI interactions in macOS applications
 
 ## Compatibility
