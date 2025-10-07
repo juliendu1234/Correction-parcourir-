@@ -110,9 +110,10 @@ class StatusWindowController: NSWindowController {
         window.titleVisibility = .hidden
         window.collectionBehavior = [.fullScreenPrimary]
         
-        // Ensure window can receive keyboard events and become key
+        // Ensure window can receive keyboard and mouse events
         window.acceptsMouseMovedEvents = true
         window.isMovableByWindowBackground = false
+        window.ignoresMouseEvents = false  // Explicitly allow mouse events
         
         loadPersistedSSID()
         setupUI()
@@ -915,6 +916,7 @@ class StatusWindowController: NSWindowController {
         let pathField = NSTextField()
         pathField.translatesAutoresizingMaskIntoConstraints = false
         pathField.isEditable = false
+        pathField.isSelectable = false  // Prevent text selection to avoid consuming clicks
         pathField.isBordered = true
         pathField.bezelStyle = .roundedBezel
         pathField.font = NSFont.systemFont(ofSize: 12)
@@ -929,6 +931,7 @@ class StatusWindowController: NSWindowController {
         selectButton.translatesAutoresizingMaskIntoConstraints = false
         selectButton.bezelStyle = .rounded
         selectButton.controlSize = .regular
+        selectButton.isEnabled = true  // Explicitly enable the button
         
         container.addSubview(title)
         container.addSubview(pathLabel)
