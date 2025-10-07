@@ -110,9 +110,10 @@ class StatusWindowController: NSWindowController {
         window.titleVisibility = .hidden
         window.collectionBehavior = [.fullScreenPrimary]
         
-        // Ensure window can receive keyboard events and become key
+        // Ensure window can receive keyboard and mouse events
         window.acceptsMouseMovedEvents = true
         window.isMovableByWindowBackground = false
+        window.ignoresMouseEvents = false  // Explicitly allow mouse events
         
         loadPersistedSSID()
         setupUI()
@@ -370,7 +371,7 @@ class StatusWindowController: NSWindowController {
             saveLocationBox.topAnchor.constraint(equalTo: mappingBox.bottomAnchor, constant: 14),  // Changed from 66 to 14
             saveLocationBox.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             saveLocationBox.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            saveLocationBox.heightAnchor.constraint(equalToConstant: 80)  // Fixed height for save location box
+            saveLocationBox.bottomAnchor.constraint(equalTo: container.bottomAnchor)  // Ensure container includes the save location box
         ])
         
         return container
@@ -915,6 +916,7 @@ class StatusWindowController: NSWindowController {
         let pathField = NSTextField()
         pathField.translatesAutoresizingMaskIntoConstraints = false
         pathField.isEditable = false
+        pathField.isSelectable = false  // Prevent text selection to avoid consuming clicks
         pathField.isBordered = true
         pathField.bezelStyle = .roundedBezel
         pathField.font = NSFont.systemFont(ofSize: 12)
@@ -929,6 +931,7 @@ class StatusWindowController: NSWindowController {
         selectButton.translatesAutoresizingMaskIntoConstraints = false
         selectButton.bezelStyle = .rounded
         selectButton.controlSize = .regular
+        selectButton.isEnabled = true  // Explicitly enable the button
         
         container.addSubview(title)
         container.addSubview(pathLabel)
@@ -944,6 +947,7 @@ class StatusWindowController: NSWindowController {
             
             pathLabel.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 15),
             pathLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+            pathLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -15),  // Add bottom padding
             
             pathField.centerYAnchor.constraint(equalTo: pathLabel.centerYAnchor),
             pathField.leadingAnchor.constraint(equalTo: pathLabel.trailingAnchor, constant: 8),
