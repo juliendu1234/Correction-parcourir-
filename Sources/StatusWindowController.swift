@@ -371,7 +371,8 @@ class StatusWindowController: NSWindowController {
             saveLocationBox.topAnchor.constraint(equalTo: mappingBox.bottomAnchor, constant: 14),  // Changed from 66 to 14
             saveLocationBox.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             saveLocationBox.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            saveLocationBox.heightAnchor.constraint(equalToConstant: 80)  // Fixed height for save location box
+            saveLocationBox.heightAnchor.constraint(equalToConstant: 80),  // Fixed height for save location box
+            saveLocationBox.bottomAnchor.constraint(equalTo: container.bottomAnchor)  // Ensure container includes the save location box
         ])
         
         return container
